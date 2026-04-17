@@ -29,6 +29,12 @@ Install the library:
 npm install react-native-fluid-bottom-bar
 ```
 
+or
+
+```sh
+yarn add react-native-fluid-bottom-bar
+```
+
 If you are using Expo, install peer dependencies with:
 
 ```sh
