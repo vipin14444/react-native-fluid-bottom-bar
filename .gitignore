@@ -48,6 +48,8 @@ example/ios/Pods
 # Ruby
 example/vendor/
 
+example/
+
 # node.js
 #
 node_modules/
