@@ -1,29 +1,26 @@
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated, {
-  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
 import { BarConstants } from './constants';
-import { type TabItem } from './types';
+import { type BottomTabItemProps } from './types';
 
-const { SPRING } = BarConstants;
-
-type BottomTabItemProps = {
-  tabItem: TabItem;
-  index: number;
-  activeIndex: SharedValue<number>;
-  isSelected: boolean;
-};
-
-export function BottomTabItem({ tabItem, isSelected }: BottomTabItemProps) {
+export function BottomTabItem({
+  tabItem,
+  isSelected,
+  textColor = '#7b7b7b',
+  barConstants = {},
+  renderLabel,
+}: BottomTabItemProps) {
+  const { SPRING = BarConstants.SPRING } = barConstants;
   const activeSharedValue = useSharedValue(0);
 
   useEffect(() => {
     activeSharedValue.value = withSpring(isSelected ? 1 : 0, SPRING);
-  }, [activeSharedValue, isSelected]);
+  }, [SPRING, activeSharedValue, isSelected]);
 
   const iconContainerStyle = useAnimatedStyle(() => ({
     transform: [
@@ -55,7 +52,11 @@ export function BottomTabItem({ tabItem, isSelected }: BottomTabItemProps) {
           {tabItem.inactiveIcon}
         </Animated.View>
       </Animated.View>
-      <Text style={styles.label}>{tabItem.title}</Text>
+      {renderLabel ? (
+        renderLabel({ isSelected, textColor, title: tabItem.title })
+      ) : (
+        <Text style={[{ color: textColor }]}>{tabItem.title}</Text>
+      )}
     </Pressable>
   );
 }
@@ -75,8 +76,5 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     pointerEvents: 'none',
-  },
-  label: {
-    color: '#7b7b7b',
   },
 });

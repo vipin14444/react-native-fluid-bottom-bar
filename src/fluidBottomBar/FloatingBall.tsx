@@ -1,18 +1,20 @@
 import { StyleSheet, View } from 'react-native';
 import Animated, {
-  type SharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
 import { BarConstants } from './constants';
+import { type FloatingBallProps } from './types';
 
-const { SPRING, TAB_WIDTH } = BarConstants;
+export function FloatingBall({
+  activeIndex,
+  floatingBallColor = '#FF4242',
+  barConstants = {},
+  renderFloatingBall,
+}: FloatingBallProps) {
+  const { SPRING = BarConstants.SPRING, TAB_WIDTH = BarConstants.TAB_WIDTH } =
+    barConstants;
 
-type FloatingBallProps = {
-  activeIndex: SharedValue<number>;
-};
-
-export function FloatingBall({ activeIndex }: FloatingBallProps) {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -25,11 +27,17 @@ export function FloatingBall({ activeIndex }: FloatingBallProps) {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[animatedStyle, styles.animatedBall]}>
-        <View style={styles.tabBallWrapper}>
-          <View style={styles.ball} />
-        </View>
-      </Animated.View>
+      {renderFloatingBall ? (
+        renderFloatingBall({ activeIndex, floatingBallColor, barConstants })
+      ) : (
+        <Animated.View style={[animatedStyle, styles.animatedBall]}>
+          <View style={[styles.tabBallWrapper, { width: TAB_WIDTH }]}>
+            <View
+              style={[styles.ball, { backgroundColor: floatingBallColor }]}
+            />
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -46,13 +54,11 @@ const styles = StyleSheet.create({
     pointerEvents: 'none',
   },
   tabBallWrapper: {
-    width: TAB_WIDTH,
     alignItems: 'center',
   },
   ball: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#FF4242',
   },
 });

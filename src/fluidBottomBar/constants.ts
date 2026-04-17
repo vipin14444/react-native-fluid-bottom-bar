@@ -1,5 +1,6 @@
 import { Dimensions } from 'react-native';
 import { type SpringConfig } from 'react-native-reanimated/lib/typescript/animation/spring';
+import { type BarConstantsType } from './types';
 
 const SPRING: SpringConfig | undefined = undefined;
 
@@ -11,7 +12,7 @@ const TAB_WIDTH = (CANVAS_WIDTH - 2 * CANVAS_PADDING) / 4;
 const CANVAS_HEIGHT = 70;
 const CANVAS_BORDER_RADIUS = 32;
 
-export const BarConstants = {
+export const BarConstants: BarConstantsType = {
   SPRING,
   CANVAS_WIDTH,
   CANVAS_MARGIN,

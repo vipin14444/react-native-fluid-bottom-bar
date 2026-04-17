@@ -1,37 +1,59 @@
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
-import { StyleSheet, View } from 'react-native';
+import { Fragment } from 'react';
+import { StyleSheet, View, type ColorValue } from 'react-native';
 import {
-  type SharedValue,
   useDerivedValue,
   withSpring,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { BottomTabItem } from './BottomTabItem';
 import { BarConstants } from './constants';
 import { FloatingBall } from './FloatingBall';
-import { type TabItem } from './types';
-
-const {
-  SPRING,
-  CANVAS_WIDTH,
-  CANVAS_MARGIN,
-  CANVAS_PADDING,
-  CANVAS_BORDER_RADIUS,
-  CANVAS_HEIGHT,
-  TAB_WIDTH,
-} = BarConstants;
+import {
+  type BarConstantsType,
+  type BottomTabItemProps,
+  type FloatingBallProps,
+  type TabItem,
+} from './types';
 
 type FluidBottomBarProps = {
   tabItems: TabItem[];
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
   activeIndex: SharedValue<number>;
+  barColor?: ColorValue;
+  floatingBallColor?: ColorValue;
+  textColor?: ColorValue;
+  barConstants?: Partial<BarConstantsType>;
+  renderFloatingBallLayer?: (props: FloatingBallProps) => React.ReactNode;
+  renderFloatingBall?: (props: FloatingBallProps) => React.ReactNode;
+  renderInteractiveLayer?: () => React.ReactNode;
+  renderTabItem?: (props: BottomTabItemProps) => React.ReactNode;
 };
 
 export function FluidBottomBar({
   tabItems,
   selectedIndex,
   activeIndex,
+  barColor = '#EDEDED',
+  floatingBallColor,
+  textColor,
+  barConstants = {},
+  renderFloatingBallLayer,
+  renderFloatingBall,
+  renderInteractiveLayer,
+  renderTabItem,
 }: FluidBottomBarProps) {
+  const {
+    SPRING = BarConstants.SPRING,
+    CANVAS_WIDTH = BarConstants.CANVAS_WIDTH,
+    CANVAS_MARGIN = BarConstants.CANVAS_MARGIN,
+    CANVAS_PADDING = BarConstants.CANVAS_PADDING,
+    CANVAS_BORDER_RADIUS = BarConstants.CANVAS_BORDER_RADIUS,
+    CANVAS_HEIGHT = BarConstants.CANVAS_HEIGHT,
+    TAB_WIDTH = BarConstants.TAB_WIDTH,
+  } = barConstants;
+
   const springIndex = useDerivedValue(() => {
     return withSpring(activeIndex.value, SPRING);
   });
@@ -81,24 +103,75 @@ export function FluidBottomBar({
   });
 
   return (
-    <View style={styles.container}>
-      <View style={styles.canvasWrapper}>
-        <Canvas style={styles.canvas}>
-          <Path path={path} color="#EDEDED" style="fill" />
+    <View style={[styles.container, { paddingHorizontal: CANVAS_MARGIN }]}>
+      <View
+        style={[
+          styles.canvasWrapper,
+          {
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            paddingHorizontal: CANVAS_PADDING,
+          },
+        ]}
+      >
+        <Canvas
+          style={[
+            styles.canvas,
+            { width: CANVAS_WIDTH, height: CANVAS_HEIGHT },
+          ]}
+        >
+          <Path path={path} color={barColor?.toString()} style="fill" />
         </Canvas>
 
-        <View style={styles.interactiveLayer}>
-          {tabItems.map((tab, index) => (
-            <BottomTabItem
-              key={index}
-              tabItem={tab}
-              index={index}
-              activeIndex={activeIndex}
-              isSelected={selectedIndex === index}
-            />
-          ))}
-        </View>
-        <FloatingBall activeIndex={activeIndex} />
+        {renderInteractiveLayer ? (
+          renderInteractiveLayer()
+        ) : (
+          <View
+            style={[
+              styles.interactiveLayer,
+              { paddingHorizontal: CANVAS_PADDING },
+            ]}
+          >
+            {tabItems.map((tab, index) => (
+              <Fragment key={index}>
+                {renderTabItem ? (
+                  renderTabItem({
+                    tabItem: tab,
+                    index,
+                    activeIndex,
+                    isSelected: selectedIndex === index,
+                    textColor,
+                    barConstants,
+                  })
+                ) : (
+                  <BottomTabItem
+                    tabItem={tab}
+                    index={index}
+                    activeIndex={activeIndex}
+                    isSelected={selectedIndex === index}
+                    textColor={textColor}
+                    barConstants={barConstants}
+                  />
+                )}
+              </Fragment>
+            ))}
+          </View>
+        )}
+
+        {renderFloatingBallLayer ? (
+          renderFloatingBallLayer({
+            activeIndex,
+            floatingBallColor,
+            barConstants,
+          })
+        ) : (
+          <FloatingBall
+            activeIndex={activeIndex}
+            floatingBallColor={floatingBallColor}
+            barConstants={barConstants}
+            renderFloatingBall={renderFloatingBall}
+          />
+        )}
       </View>
     </View>
   );
@@ -110,18 +183,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 32,
     width: '100%',
-    paddingHorizontal: CANVAS_MARGIN,
   },
   canvasWrapper: {
-    width: CANVAS_WIDTH,
-    height: CANVAS_HEIGHT,
     flexDirection: 'row',
-    paddingHorizontal: CANVAS_PADDING,
     justifyContent: 'center',
   },
   canvas: {
-    width: CANVAS_WIDTH,
-    height: CANVAS_HEIGHT,
     zIndex: 1,
   },
   interactiveLayer: {
@@ -130,7 +197,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: CANVAS_PADDING,
     zIndex: 3,
     flexDirection: 'row',
     alignItems: 'center',
