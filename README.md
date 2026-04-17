@@ -4,6 +4,8 @@
 ![license](https://img.shields.io/npm/l/react-native-fluid-bottom-bar)
 ![platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-blue)
 
+![React Native Fluid Bottom Bar](./media/showcase.webp)
+
 A beautiful, animated fluid bottom navigation bar for React Native built with **Skia** and **Reanimated**.
 
 It gives you a smooth curved bar, a floating active indicator, and flexible render hooks for fully custom tab designs.
