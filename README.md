@@ -1,12 +1,11 @@
-# react-native-fluid-bottom-bar
+# React Native Fluid Bottom Bar (optimised for Expo)
 
-![npm](https://img.shields.io/npm/v/react-native-fluid-bottom-bar)
-![license](https://img.shields.io/npm/l/react-native-fluid-bottom-bar)
-![platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-blue)
+![npm](https://img.shields.io/npm/v/react-native-fluid-bottom-bar) [![Reanimated v5](https://img.shields.io/github/package-json/v/gorhom/react-native-bottom-sheet/master?label=Reanimated%20v5&style=flat-square)](https://www.npmjs.com/package/react-native-fluid-bottom-bar)<br>
+![license](https://img.shields.io/npm/l/react-native-fluid-bottom-bar) [![npm](https://img.shields.io/badge/types-included-blue?style=flat-square)](https://www.npmjs.com/package/@gorhom/bottom-sheet) [![runs with expo](https://img.shields.io/badge/Runs%20with%20Expo-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.io/) <br> ![platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-blue)
 
 ![React Native Fluid Bottom Bar](./media/showcase.webp)
 
-A beautiful, animated fluid bottom navigation bar for React Native built with **Skia** and **Reanimated**.
+A beautiful, animated fluid bottom navigation bar for React Native built with **React Native Skia** and **React Native Reanimated**.
 
 It gives you a smooth curved bar, a floating active indicator, and flexible render hooks for fully custom tab designs.
 
@@ -40,16 +39,18 @@ yarn add react-native-fluid-bottom-bar
 If you are using Expo, install peer dependencies with:
 
 ```sh
-npx expo install react-native-reanimated react-native-gesture-handler @shopify/react-native-skia
+npx expo install react-native-reanimated react-native-gesture-handler @shopify/react-native-skia react-native-worklets
 ```
 
 For a bare React Native app:
 
 ```sh
-npm install react-native-reanimated react-native-gesture-handler @shopify/react-native-skia
+npm install react-native-reanimated react-native-gesture-handler @shopify/react-native-skia react-native-worklets
 ```
 
-> Make sure Reanimated and Skia are configured correctly in your app according to their official installation guides.
+> Make sure Reanimated and Skia are configured correctly in your app according to their official installation guides. Also, make sure react-native-worklets is installed as well as the animations run on worklet to keep the UI thread free.
+
+> Make sure to prebuild and build your app again after installing all the dependencies.
 
 ---
 
