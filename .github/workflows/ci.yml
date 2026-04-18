@@ -62,6 +62,7 @@ jobs:
 
     env:
       TURBO_CACHE_DIR: .turbo/android
+      TURBO_CACHE_HIT: "0"
 
     steps:
       - name: Checkout
@@ -70,7 +71,18 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
+      - name: Check Android example app
+        id: android-example
+        run: |
+          if [[ -d example && -f example/package.json ]]; then
+            echo "available=1" >> $GITHUB_OUTPUT
+          else
+            echo "available=0" >> $GITHUB_OUTPUT
+            echo "Skipping Android example build because example/package.json is missing."
+          fi
+
       - name: Cache turborepo for Android
+        if: steps.android-example.outputs.available == '1'
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
@@ -79,42 +91,46 @@ jobs:
             ${{ runner.os }}-turborepo-android-
 
       - name: Check turborepo cache for Android
+        if: steps.android-example.outputs.available == '1'
         run: |
-          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.task === 'build:android').cache.status")
+          TURBO_CACHE_STATUS=$(node -p "(($(yarn turbo run build:android --cache-dir=\"${{ env.TURBO_CACHE_DIR }}\" --dry=json)).tasks.find(t => t.task === 'build:android')?.cache?.status) ?? 'MISS'")
 
           if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
-            echo "turbo_cache_hit=1" >> $GITHUB_ENV
+            echo "TURBO_CACHE_HIT=1" >> $GITHUB_ENV
           fi
 
       - name: Install JDK
-        if: env.turbo_cache_hit != 1
+        if: steps.android-example.outputs.available == '1' && env.TURBO_CACHE_HIT != '1'
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Finalize Android SDK
-        if: env.turbo_cache_hit != 1
+        if: steps.android-example.outputs.available == '1' && env.TURBO_CACHE_HIT != '1'
         run: |
           /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
 
       - name: Prebuild expo app for Android
-        if: env.turbo_cache_hit != 1
+        if: steps.android-example.outputs.available == '1' && env.TURBO_CACHE_HIT != '1'
         run: |
           yarn example expo prebuild --platform android
 
       - name: Cache Gradle
-        if: env.turbo_cache_hit != 1
+        if: steps.android-example.outputs.available == '1' && env.TURBO_CACHE_HIT != '1'
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('example/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{
+            hashFiles('example/android/gradle/wrapper/gradle-wrapper.properties')
+            }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
       - name: Build example for Android
+        if: steps.android-example.outputs.available == '1'
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
@@ -126,6 +142,7 @@ jobs:
     env:
       XCODE_VERSION: 26
       TURBO_CACHE_DIR: .turbo/ios
+      TURBO_CACHE_HIT: "0"
       RCT_USE_RN_DEP: 1
       RCT_USE_PREBUILT_RNCORE: 1
 
@@ -136,7 +153,18 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
+      - name: Check iOS example app
+        id: ios-example
+        run: |
+          if [[ -d example && -f example/package.json ]]; then
+            echo "available=1" >> $GITHUB_OUTPUT
+          else
+            echo "available=0" >> $GITHUB_OUTPUT
+            echo "Skipping iOS example build because example/package.json is missing."
+          fi
+
       - name: Cache turborepo for iOS
+        if: steps.ios-example.outputs.available == '1'
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
@@ -145,25 +173,27 @@ jobs:
             ${{ runner.os }}-turborepo-ios-
 
       - name: Check turborepo cache for iOS
+        if: steps.ios-example.outputs.available == '1'
         run: |
-          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.task === 'build:ios').cache.status")
+          TURBO_CACHE_STATUS=$(node -p "(($(yarn turbo run build:ios --cache-dir=\"${{ env.TURBO_CACHE_DIR }}\" --dry=json)).tasks.find(t => t.task === 'build:ios')?.cache?.status) ?? 'MISS'")
 
           if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
-            echo "turbo_cache_hit=1" >> $GITHUB_ENV
+            echo "TURBO_CACHE_HIT=1" >> $GITHUB_ENV
           fi
 
       - name: Use appropriate Xcode version
-        if: env.turbo_cache_hit != 1
+        if: steps.ios-example.outputs.available == '1' && env.TURBO_CACHE_HIT != '1'
         uses: maxim-lobanov/setup-xcode@60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Prebuild expo app for iOS
-        if: env.turbo_cache_hit != 1
+        if: steps.ios-example.outputs.available == '1' && env.TURBO_CACHE_HIT != '1'
         run: |
           yarn example expo prebuild --platform ios
 
       - name: Build example for iOS
+        if: steps.ios-example.outputs.available == '1'
         run: |
           yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}"
 
@@ -179,4 +209,8 @@ jobs:
 
       - name: Build example for Web
         run: |
-          yarn example build:web
+          if [[ -d example && -f example/package.json ]]; then
+            yarn example build:web
+          else
+            echo "Skipping web example build because example/package.json is missing."
+          fi
