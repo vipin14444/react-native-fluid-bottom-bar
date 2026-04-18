@@ -203,6 +203,7 @@ const styles = StyleSheet.create({
   canvasWrapper: {
     flexDirection: 'row',
     justifyContent: 'center',
+    zIndex: 1,
   },
   canvas: {
     zIndex: 1,
