@@ -1,6 +1,11 @@
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { Fragment } from 'react';
-import { StyleSheet, View, type ColorValue } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  type ColorValue,
+  type ViewStyle,
+} from 'react-native';
 import {
   useDerivedValue,
   withSpring,
@@ -25,6 +30,8 @@ type FluidBottomBarProps = {
   floatingBallColor?: ColorValue;
   textColor?: ColorValue;
   barConstants?: Partial<BarConstantsType>;
+  containerStyle?: ViewStyle;
+  canvasWrapperStyle?: ViewStyle;
   renderFloatingBallLayer?: (props: FloatingBallProps) => React.ReactNode;
   renderFloatingBall?: (props: FloatingBallProps) => React.ReactNode;
   renderInteractiveLayer?: () => React.ReactNode;
@@ -43,6 +50,8 @@ export function FluidBottomBar({
   renderFloatingBall,
   renderInteractiveLayer,
   renderTabItem,
+  containerStyle = {},
+  canvasWrapperStyle = {},
 }: FluidBottomBarProps) {
   const {
     SPRING = BarConstants.SPRING,
@@ -103,7 +112,13 @@ export function FluidBottomBar({
   });
 
   return (
-    <View style={[styles.container, { paddingHorizontal: CANVAS_MARGIN }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingHorizontal: CANVAS_MARGIN },
+        containerStyle,
+      ]}
+    >
       <View
         style={[
           styles.canvasWrapper,
@@ -112,6 +127,7 @@ export function FluidBottomBar({
             height: CANVAS_HEIGHT,
             paddingHorizontal: CANVAS_PADDING,
           },
+          canvasWrapperStyle,
         ]}
       >
         <Canvas
